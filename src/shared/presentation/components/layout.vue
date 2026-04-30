@@ -95,7 +95,7 @@ onMounted(() => {
     </div>
   </div>
   <div>
-    <article-list v-if="articles" v-model:articles="articles" :key="rerenderKey"/>
+    <article-list v-if="articles" :articles="articles" :key="rerenderKey"/>
     <unavailable-content v-else :errors="errors"/>
   </div>
   <footer-content/>

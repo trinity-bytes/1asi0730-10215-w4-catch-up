@@ -20,11 +20,23 @@ const { articles } = toRefs(props);
 </script>
 
 <template>
-  <div v-for="article in articles">
-    <article-item :article="article"/>
+  <div class="article-grid">
+    <div v-for="article in articles" :key="article.id" class="article-card">
+      <article-item :article="article"/>
+    </div>
   </div>
 </template>
 
 <style scoped>
+  .article-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
 
+  @media (max-width: 768px) {
+    .article-grid {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
