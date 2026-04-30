@@ -93,6 +93,30 @@ This project includes documentation for user stories and a class diagram:
 - User stories: `docs/user-stories.md`
 - Class diagram: `docs/class-diagram.puml`
 
+## GitHub Pages Deployment
+
+This project is configured to deploy automatically to GitHub Pages using GitHub Actions.
+
+### Requirements
+
+- The repository must have GitHub Pages enabled.
+- The Pages source must be set to **GitHub Actions**.
+- The Vite `base` option must match the repository name.
+
+### Vite base configuration
+
+If the repository name is `catch-up`, `vite.config.js` should include:
+
+```js
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+
+export default defineConfig({
+  base: '/catch-up/',
+  plugins: [vue()],
+})
+```
+
 ## Attribution
 
 This app uses data and branding services from:
