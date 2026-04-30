@@ -126,4 +126,4 @@ This app uses data and branding services from:
 
 ## License
 
-MIT
+- MIT
