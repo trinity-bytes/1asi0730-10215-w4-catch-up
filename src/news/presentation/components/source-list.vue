@@ -24,7 +24,7 @@ import {toRefs} from "vue";
 import SourceItem from "./source-item.vue";
 
 const props = defineProps({ visible: Boolean, sources: Array[Source]});
-const emit = defineEmits(['source-selected']);
+const emit = defineEmits(['source-selected', 'update:visible']); // Define the event for closing the drawer
 
 /**
  * Forwards the `source-selected` event emitted by a child {@link SourceItem}
@@ -42,7 +42,7 @@ const { visible, sources } = toRefs(props);
 </script>
 
 <template>
-  <pv-drawer v-bind:visible="visible">
+  <pv-drawer v-bind:visible="visible" @update:visible="emit('update:visible', $event)">
     <source-item v-for="source in sources"
                  :key="source.id"
                  :source="source"
