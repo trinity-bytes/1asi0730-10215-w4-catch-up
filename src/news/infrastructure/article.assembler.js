@@ -5,7 +5,7 @@
  * domain entities. Supports an optional pre-resolved {@link Source} entity to
  * avoid redundant source assembly when the source is already known.
  *
- * This assembler is compatible with Newsdata.io and NewsAPI.org response formats.
+ * This assembler is compatible with Newsdata.io response formats.
  *
  * @module news/infrastructure/article-assembler
  */
@@ -14,7 +14,7 @@ import {Article} from "../domain/model/article.entity.js";
 import {SourceAssembler} from "./source.assembler.js";
 
 /**
- * Assembler that converts raw NewsAPI article records into {@link Article}
+ * Assembler that converts raw Newsdata.io article records into {@link Article}
  * domain entities.
  *
  * The `withSource` builder method enables the caller to supply a pre-resolved
@@ -57,7 +57,8 @@ export class ArticleAssembler {
     /**
  * Assembles a single {@link Article} entity from a raw API article record.
      *
-     * Handles field mapping from different providers (e.g. image_url from Newsdata.io).
+     * Handles field mapping from Newsdata.io (for example `image_url`, `pubDate`
+     * and `link`).
      *
      * If a pre-resolved source is set via {@link ArticleAssembler.withSource}
      * and its `id` matches the record's source ID, that entity is reused
@@ -67,22 +68,25 @@ export class ArticleAssembler {
      * @param {object}  resource               - Raw article record from the API response.
      * @param {string}  resource.title          - Article headline.
      * @param {string}  resource.description    - Article summary.
-     * @param {string}  resource.url            - Permalink to the full article.
-     * @param {string}  [resource.urlToImage]   - URL of the article's cover image (NewsAPI).
+     * @param {string}  [resource.url]          - Permalink to the full article.
+     * @param {string}  [resource.link]         - Permalink to the full article (Newsdata.io).
+     * @param {string}  [resource.urlToImage]   - URL of the article's cover image.
      * @param {string}  [resource.image_url]    - URL of the article's cover image (Newsdata.io).
-     * @param {string}  [resource.publishedAt]  - ISO 8601 publication datetime (NewsAPI).
+     * @param {string}  [resource.publishedAt]  - ISO 8601 publication datetime.
      * @param {string}  [resource.pubDate]      - Publication datetime (Newsdata.io).
-     * @param {object}  [resource.source]       - Embedded raw source record (NewsAPI).
+     * @param {object}  [resource.source]       - Embedded raw source record.
      * @param {string}  [resource.source_id]    - Source identifier (Newsdata.io).
+     * @param {string}  [resource.source_url]   - Source homepage URL when provided separately.
      * @returns {Article} A fully hydrated {@link Article} entity.
      */
     static toEntityFromResource(resource) {
         // Normalize fields from different providers
         const normalizedResource = {
             ...resource,
+            url: resource.url || resource.link || '',
             urlToImage: resource.urlToImage || resource.image_url || '',
             publishedAt: resource.publishedAt || resource.pubDate || '',
-            source: resource.source || { id: resource.source_id || '' }
+            source: resource.source || { id: resource.source_id || '', url: resource.source_url || '' }
         };
 
         let article = new Article(normalizedResource);
@@ -102,8 +106,8 @@ export class ArticleAssembler {
      *   response from {@link NewsApi#getArticlesForSourceId}.
      * @param {object}   response.data            - Parsed JSON body of the response.
      * @param {string}   [response.data.status]   - API status flag ("ok", "success" or "error").
-     * @param {object[]} [response.data.articles] - Array of raw article records (NewsAPI).
-     * @param {object[]} [response.data.results]  - Array of raw article records (Newsdata.io).
+     * @param {object[]} [response.data.articles] - Array of raw article records.
+     * @param {object[]} [response.data.results]  - Array of raw article records.
      * @returns {Article[]} Array of assembled {@link Article} entities, or an
      *   empty array if the response indicates an error.
      */
