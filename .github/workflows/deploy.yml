@@ -40,6 +40,7 @@ jobs:
           VITE_TOP_HEADLINES_ENDPOINT_PATH: ${{ vars.VITE_TOP_HEADLINES_ENDPOINT_PATH }}
           VITE_LOGO_API_URL: ${{ vars.VITE_LOGO_API_URL }}
           VITE_LOGO_PUBLISHABLE_API_KEY: ${{ secrets.VITE_LOGO_PUBLISHABLE_API_KEY }}
+          VITE_CORS_PROXY_URL: ${{ vars.VITE_CORS_PROXY_URL }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

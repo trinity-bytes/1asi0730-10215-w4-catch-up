@@ -38,19 +38,36 @@ Open the local URL printed by Vite (usually `http://localhost:5173`).
 - `npm run build`: creates a production build in `dist/`.
 - `npm run preview`: serves the production build locally.
 
+### Switching to Newsdata.io
+
+This project has been updated to use [Newsdata.io](https://newsdata.io/) as the default news provider. Newsdata.io allows requests from production domains (like GitHub Pages) in its free tier, so a CORS proxy is no longer strictly necessary.
+
+If you still wish to use NewsAPI.org or encounter CORS issues:
+1. **Use a CORS Proxy**: Set the `VITE_CORS_PROXY_URL` environment variable to a proxy service (e.g., `https://cors-anywhere.herokuapp.com`).
+2. **Revert Endpoints**: Ensure `VITE_SOURCES_ENDPOINT_PATH` and `VITE_TOP_HEADLINES_ENDPOINT_PATH` match the provider's requirements.
+
 ## Environment Variables
 
 This project reads API settings from Vite environment variables (`import.meta.env`).
 
-Create a local env file (for example `.env.local`) with:
+### Newsdata.io Configuration (Default)
+```bash
+VITE_NEWS_API_URL=https://newsdata.io/api/1
+VITE_NEWS_API_KEY=your_newsdata_io_key
+VITE_SOURCES_ENDPOINT_PATH=/sources
+VITE_TOP_HEADLINES_ENDPOINT_PATH=/latest
+VITE_LOGO_API_URL=https://img.logo.dev
+VITE_LOGO_PUBLISHABLE_API_KEY=your_logo_dev_publishable_key
+VITE_CORS_PROXY_URL= # (Optional) Prefix URL for CORS proxy
+```
 
+### NewsAPI.org Configuration (Alternative)
 ```bash
 VITE_NEWS_API_URL=https://newsapi.org/v2
 VITE_NEWS_API_KEY=your_news_api_key
 VITE_SOURCES_ENDPOINT_PATH=/top-headlines/sources
 VITE_TOP_HEADLINES_ENDPOINT_PATH=/top-headlines
-VITE_LOGO_API_URL=https://img.logo.dev
-VITE_LOGO_PUBLISHABLE_API_KEY=your_logo_dev_publishable_key
+...
 ```
 
 Notes:
@@ -121,7 +138,7 @@ export default defineConfig({
 
 This app uses data and branding services from:
 
-- [NewsAPI.org](https://www.newsapi.org)
+- [Newsdata.io](https://newsdata.io)
 - [Logo.dev Logo API](https://logo.dev)
 
 ## License
