@@ -46,8 +46,8 @@ function emitSourceSelectedEvent() {
                  shape="circle"/>
     </span>
       <span class="flex align-items-center justify-content-center">
-      {{ source.name }}
-    </span>
+        {{ source.name }}
+      </span>
     </div>
   </div>
 </template>
