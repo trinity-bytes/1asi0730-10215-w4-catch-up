@@ -1,7 +1,7 @@
 /**
- * @fileoverview NewsAPI HTTP gateway — News bounded context infrastructure.
+ * @fileoverview News HTTP gateway — News bounded context infrastructure.
  *
- * Wraps the NewsAPI REST endpoints with pre-configured Axios instances so
+ * Wraps the Newsdata.io REST endpoints with pre-configured Axios instances so
  * the rest of the application remains decoupled from HTTP transport details.
  *
  * @module news/infrastructure/news-api
@@ -15,9 +15,9 @@ const sourcesEndpoint       = import.meta.env.VITE_SOURCES_ENDPOINT_PATH;
 const topHeadlinesEndpoint  = import.meta.env.VITE_TOP_HEADLINES_ENDPOINT_PATH;
 
 /**
- * Shared Axios instance pre-configured with the News provider base URL and API key.
+ * Shared Axios instance pre-configured with the news provider base URL and API key.
  * All requests made through this instance automatically include the required
- * `apikey` query parameter (note: Newsdata.io uses `apikey` in lowercase).
+ * `apikey` query parameter.
  *
  * It also supports an optional CORS proxy URL, although less likely to be needed
  * with providers that allow production domains.
@@ -34,7 +34,7 @@ const http = axios.create({
 });
 
 /**
- * Infrastructure gateway that communicates with the NewsAPI REST API.
+ * Infrastructure gateway that communicates with the Newsdata.io REST API.
  *
  * Each method returns a raw Axios `Promise` whose resolved value is an
  * `AxiosResponse`. Callers in the application layer are responsible for
@@ -43,10 +43,10 @@ const http = axios.create({
  */
 export class NewsApi {
     /**
-     * Retrieves the list of all available news sources from NewsAPI.
+     * Retrieves the list of all available news sources from Newsdata.io.
      *
      * Corresponds to the `/sources` endpoint. The response contains a
-     * `sources` array with raw source representations that must be
+     * `sources` or `results` array with raw source representations that must be
      * assembled into {@link Source} domain entities via
      * {@link SourceAssembler}.
      *
@@ -60,8 +60,8 @@ export class NewsApi {
     /**
      * Retrieves the top-headline articles published by the specified source.
      *
-     * Corresponds to the `/top-headlines` endpoint filtered by `sources`.
-     * The response contains an `articles` array that must be assembled into
+     * Corresponds to the `/latest` endpoint filtered by `domain`.
+     * The response contains an `articles` or `results` array that must be assembled into
      * {@link Article} domain entities via {@link ArticleAssembler}.
      *
      * @param {string} sourceId - The unique identifier of the news source

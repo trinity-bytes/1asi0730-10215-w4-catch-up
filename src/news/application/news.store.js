@@ -64,7 +64,7 @@ export const newsStore = reactive({
     },
 
     /**
-     * Fetches all available news sources from the NewsAPI gateway, assembles
+     * Fetches all available news sources from the Newsdata.io gateway, assembles
      * them into {@link Source} domain entities, and stores the result.
      *
      * On success the first source in the list is automatically selected and
@@ -80,7 +80,6 @@ export const newsStore = reactive({
             this.sources = SourceAssembler.toEntitiesFromResponse(response);
             if (this.sources.length > 0) {
                 this.setCurrentSource(this.sources[0]);
-                this.loadArticlesForCurrentSource();
             }
         }).catch(error => {
             this.errors.push(error);
@@ -91,7 +90,7 @@ export const newsStore = reactive({
 
     /**
      * Fetches the top-headline articles for {@link newsStore.currentSource}
-     * from the NewsAPI gateway and assembles them into {@link Article} domain
+     * from the Newsdata.io gateway and assembles them into {@link Article} domain
      * entities.
      *
      * Returns early without making a network request when no source is
