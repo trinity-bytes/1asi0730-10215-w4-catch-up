@@ -5,7 +5,7 @@
  * domain entities and for enriching them with derived data (e.g. logo URLs)
  * that is not part of the API payload.
  *
- * This assembler is compatible with Newsdata.io and NewsAPI.org response formats.
+ * This assembler is compatible with Newsdata.io response formats.
  *
  * @module news/infrastructure/source-assembler
  */
@@ -16,7 +16,7 @@ import {Source} from "../domain/model/source.entity.js";
 const logoApi = new LogoDevApi();
 
 /**
- * Assembler that converts raw NewsAPI source records into {@link Source}
+ * Assembler that converts raw Newsdata.io source records into {@link Source}
  * domain entities.
  *
  * The assembler pattern keeps the transformation logic out of both the domain
@@ -35,18 +35,26 @@ export class SourceAssembler {
      * non-empty.
      *
      * @param {object} resource - Raw source record as returned by the API
-     *   `/sources` or `/sources` endpoint.
+     *   `/sources` endpoint.
      * @param {string} [resource.id]          - Source identifier.
+     * @param {string} [resource.source_id]   - Source identifier (Newsdata.io).
      * @param {string} [resource.name]        - Source display name.
+     * @param {string} [resource.source_name] - Source display name (Newsdata.io).
      * @param {string} [resource.description] - Source description.
      * @param {string} [resource.url]         - Source homepage URL.
+     * @param {string} [resource.source_url]  - Source homepage URL (Newsdata.io).
      * @param {string} [resource.category]    - Editorial category.
      * @param {string} [resource.language]    - ISO 639-1 language code.
      * @param {string} [resource.country]     - ISO 3166-1 alpha-2 country code.
      * @returns {Source} A fully hydrated and enriched {@link Source} entity.
      */
     static toEntityFromResource(resource) {
-        let source = new Source({...resource});
+        const source = new Source({
+            ...resource,
+            id: resource.id || resource.source_id || resource.source || '',
+            name: resource.name || resource.source_name || '',
+            url: resource.url || resource.source_url || resource.homepage || ''
+        });
         // Use domain from ID if URL is missing (common in some providers)
         const sourceUrl = source.url || (source.id && source.id.includes('.') ? `https://${source.id}` : '');
         source.urlToLogo = sourceUrl !== '' ? logoApi.getUrlToLogo(sourceUrl) : '';
@@ -65,8 +73,8 @@ export class SourceAssembler {
      *   response from {@link NewsApi#getSources}.
      * @param {object}   response.data           - Parsed JSON body of the response.
      * @param {string}   [response.data.status]  - API status flag ("ok", "success" or "error").
-     * @param {object[]} [response.data.sources] - Array of raw source records (NewsAPI).
-     * @param {object[]} [response.data.results] - Array of raw source records (Newsdata.io).
+     * @param {object[]} [response.data.sources] - Array of raw source records.
+     * @param {object[]} [response.data.results] - Array of raw source records.
      * @returns {Source[]} Array of assembled {@link Source} entities, or an
      *   empty array if the response indicates an error.
      */

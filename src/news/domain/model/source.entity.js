@@ -6,8 +6,8 @@
 /**
  * Represents a news source as a domain entity.
  *
- * A `Source` encapsulates all identity and descriptive attributes of a
- * publisher registered in the NewsAPI catalogue. It is the aggregate root
+ * A `Source` encapsulates the identity and descriptive attributes of a
+ * publisher registered by the current news provider. It is the aggregate root
  * for source-related data within the News bounded context.
  */
 export class Source {
@@ -19,11 +19,8 @@ export class Source {
      * @param {string}  [params.name='']         - Human-readable display name of the source.
      * @param {string}  [params.description='']  - Brief description of the source's editorial focus.
      * @param {string}  [params.url='']          - Canonical homepage URL of the source.
-     * @param {string}  [params.category='']     - Editorial category (e.g. "technology", "sports").
-     * @param {string}  [params.language='']     - ISO 639-1 language code of the source's content.
-     * @param {string}  [params.country='']      - ISO 3166-1 alpha-2 country code of the source.
      */
-    constructor({id = '', name = '', description = '', url = '', category = '', language = '', country = ''}) {
+    constructor({id = '', name = '', description = '', url = ''}) {
         /** @type {string} Unique identifier assigned by the news provider. */
         this.id = id;
         /** @type {string} Human-readable display name of the source. */
@@ -32,17 +29,26 @@ export class Source {
         this.description = description;
         /** @type {string} Canonical homepage URL of the source. */
         this.url = url;
-        /** @type {string} Editorial category (e.g. "technology", "sports"). */
-        this.category = category;
-        /** @type {string} ISO 639-1 language code of the source's content. */
-        this.language = language;
-        /** @type {string} ISO 3166-1 alpha-2 country code of the source. */
-        this.country = country;
         /**
          * Resolved logo image URL provided by the Logo.dev API.
          * Populated by the infrastructure layer after entity construction.
          * @type {string}
          */
         this.urlToLogo = '';
+    }
+
+    /**
+     * Serializes the source into a plain object.
+     *
+     * @returns {object} A plain representation of the source entity.
+     */
+    toJSON() {
+        return {
+            id: this.id,
+            name: this.name,
+            description: this.description,
+            url: this.url,
+            urlToLogo: this.urlToLogo
+        };
     }
 }
