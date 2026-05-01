@@ -3,7 +3,7 @@
  * @component FooterContent
  * @description Shared presentation component that renders the application
  * footer, including copyright information, authoring credits, and
- * attribution links for the third-party services (NewsAPI.org and
+ * attribution links for the third-party services (Newsdata.io and
  * Logo.dev) used by the application.
  *
  * All visible strings are internationalised through Vue I18n so that the
@@ -28,8 +28,8 @@ const { t } = useI18n();
         {{t('authoring-phrase.author', {brand:'ACME'})}}
       </p>
       <p>
-        {{t('footer.powered-by')}} <a href="https://www.newsapi.org">NewsAPI.org</a>
-        {{t('footer.and')}} <a href="https://logo.dev">Logo.dev Logo API</a>
+        {{t('footer.powered-by')}} <a href="https://newsdata.io" target="_blank" rel="noopener noreferrer">Newsdata.io</a>
+        {{t('footer.and')}} <a href="https://logo.dev" target="_blank" rel="noopener noreferrer">Logo.dev Logo API</a>
       </p>
     </div>
   </div>

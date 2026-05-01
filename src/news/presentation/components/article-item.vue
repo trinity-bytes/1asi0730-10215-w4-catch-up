@@ -19,13 +19,28 @@
  */
 import {useI18n} from "vue-i18n";
 import {Article} from "../../domain/model/article.entity.js";
-import {toRefs} from "vue";
+import {computed, toRefs} from "vue";
 
 const { t } = useI18n();
 
 const props = defineProps({article: {type: Article, required: true}});
 const { article } = toRefs(props);
 const emit = defineEmits(['tooltip-showed']);
+
+function getValidExternalUrl(url) {
+  if (typeof url !== 'string' || url.trim() === '') {
+    return '';
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+    return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:' ? parsedUrl.href : '';
+  } catch {
+    return '';
+  }
+}
+
+const articleUrl = computed(() => getValidExternalUrl(article.value?.url));
 
 /**
  * Shares the current article using the Web Share API when available, or
@@ -45,7 +60,7 @@ const emit = defineEmits(['tooltip-showed']);
  */
 async function shareArticle() {
   let articleToShare = article.value;
-  const shareData = {title: articleToShare["title"], url: articleToShare["url"]};
+  const shareData = {title: articleToShare["title"], url: articleUrl.value};
   if (navigator.share) {
     try {
       await navigator.share(shareData);
@@ -95,7 +110,8 @@ async function shareArticle() {
     </template>
     <template #footer>
       <div class="flex justify-content -webkit-box-sizing: border-box; justify-content: space-between;">
-        <a :href="article.url" target="_blank">{{ t('read-more')}}</a>
+        <a v-if="articleUrl" :href="articleUrl" rel="noopener noreferrer" target="_blank">{{ t('read-more')}}</a>
+        <span v-else>{{ t('read-more')}}</span>
         <span class="p-spacer"></span>
         <pv-button
             tooltip="t('article.copy-to-clipboard')"
