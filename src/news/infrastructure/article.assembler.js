@@ -1,9 +1,11 @@
 /**
  * @fileoverview ArticleAssembler — News bounded context infrastructure layer.
  *
- * Responsible for translating raw NewsAPI article records into {@link Article}
+ * Responsible for translating raw API article records into {@link Article}
  * domain entities. Supports an optional pre-resolved {@link Source} entity to
  * avoid redundant source assembly when the source is already known.
+ *
+ * This assembler is compatible with Newsdata.io and NewsAPI.org response formats.
  *
  * @module news/infrastructure/article-assembler
  */
@@ -53,52 +55,66 @@ export class ArticleAssembler {
     }
 
     /**
-     * Assembles a single {@link Article} entity from a raw API article record.
+ * Assembles a single {@link Article} entity from a raw API article record.
+     *
+     * Handles field mapping from different providers (e.g. image_url from Newsdata.io).
      *
      * If a pre-resolved source is set via {@link ArticleAssembler.withSource}
-     * and its `id` matches the record's `source.id`, that entity is reused
+     * and its `id` matches the record's source ID, that entity is reused
      * directly. Otherwise, the source is assembled via
      * {@link SourceAssembler.toEntityFromResource}.
      *
-     * @param {object}  resource               - Raw article record from the NewsAPI response.
+     * @param {object}  resource               - Raw article record from the API response.
      * @param {string}  resource.title          - Article headline.
      * @param {string}  resource.description    - Article summary.
      * @param {string}  resource.url            - Permalink to the full article.
-     * @param {string}  resource.urlToImage     - URL of the article's cover image.
-     * @param {string}  resource.publishedAt    - ISO 8601 publication datetime.
-     * @param {object}  resource.source         - Embedded raw source record.
-     * @param {string}  resource.source.id      - Source identifier used for entity reuse.
+     * @param {string}  [resource.urlToImage]   - URL of the article's cover image (NewsAPI).
+     * @param {string}  [resource.image_url]    - URL of the article's cover image (Newsdata.io).
+     * @param {string}  [resource.publishedAt]  - ISO 8601 publication datetime (NewsAPI).
+     * @param {string}  [resource.pubDate]      - Publication datetime (Newsdata.io).
+     * @param {object}  [resource.source]       - Embedded raw source record (NewsAPI).
+     * @param {string}  [resource.source_id]    - Source identifier (Newsdata.io).
      * @returns {Article} A fully hydrated {@link Article} entity.
      */
     static toEntityFromResource(resource) {
-        let article = new Article(resource);
-        article.source = this.source && this.source.id === resource.source.id
-            ? this.source : SourceAssembler.toEntityFromResource(resource.source);
+        // Normalize fields from different providers
+        const normalizedResource = {
+            ...resource,
+            urlToImage: resource.urlToImage || resource.image_url || '',
+            publishedAt: resource.publishedAt || resource.pubDate || '',
+            source: resource.source || { id: resource.source_id || '' }
+        };
+
+        let article = new Article(normalizedResource);
+        article.source = this.source && this.source.id === normalizedResource.source.id
+            ? this.source : SourceAssembler.toEntityFromResource(normalizedResource.source);
         return article;
     }
 
     /**
-     * Assembles a collection of {@link Article} entities from a full NewsAPI
+     * Assembles a collection of {@link Article} entities from a full API
      * HTTP response.
      *
      * Returns an empty array — without throwing — when the API reports a
-     * non-`ok` status, and logs the error details for diagnostic purposes.
+     * failure, and logs the error details for diagnostic purposes.
      *
      * @param {import('axios').AxiosResponse} response - The resolved Axios
      *   response from {@link NewsApi#getArticlesForSourceId}.
      * @param {object}   response.data            - Parsed JSON body of the response.
-     * @param {string}   response.data.status     - NewsAPI status flag (`"ok"` or `"error"`).
-     * @param {object[]} response.data.articles   - Array of raw article records.
+     * @param {string}   [response.data.status]   - API status flag ("ok", "success" or "error").
+     * @param {object[]} [response.data.articles] - Array of raw article records (NewsAPI).
+     * @param {object[]} [response.data.results]  - Array of raw article records (Newsdata.io).
      * @returns {Article[]} Array of assembled {@link Article} entities, or an
      *   empty array if the response indicates an error.
      */
     static toEntitiesFromResponse(response) {
-        if (response.data.status !== 'ok') {
-            console.error(`${response.status}, ${response.data.code}, ${response.message}`);
+        if (response.data.status !== 'ok' && response.data.status !== 'success') {
+            console.error(`${response.status}, ${response.data.code || 'ERROR'}, ${response.data.message || 'Request failed'}`);
             return [];
         }
         const articlesResponse = response.data;
+        const articles = articlesResponse["articles"] || articlesResponse["results"] || [];
         console.log(response.data);
-        return articlesResponse["articles"].map(article => this.toEntityFromResource(article));
+        return articles.map(article => this.toEntityFromResource(article));
     }
 }

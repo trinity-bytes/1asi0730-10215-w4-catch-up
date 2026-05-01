@@ -15,16 +15,21 @@ const sourcesEndpoint       = import.meta.env.VITE_SOURCES_ENDPOINT_PATH;
 const topHeadlinesEndpoint  = import.meta.env.VITE_TOP_HEADLINES_ENDPOINT_PATH;
 
 /**
- * Shared Axios instance pre-configured with the NewsAPI base URL and API key.
+ * Shared Axios instance pre-configured with the News provider base URL and API key.
  * All requests made through this instance automatically include the required
- * `apiKey` query parameter.
+ * `apikey` query parameter (note: Newsdata.io uses `apikey` in lowercase).
+ *
+ * It also supports an optional CORS proxy URL, although less likely to be needed
+ * with providers that allow production domains.
  *
  * @type {import('axios').AxiosInstance}
  */
 const http = axios.create({
-    baseURL: newsApi,
+    baseURL: import.meta.env.VITE_CORS_PROXY_URL
+        ? `${import.meta.env.VITE_CORS_PROXY_URL}/${newsApi}`
+        : newsApi,
     params: {
-        apiKey: apiKey,
+        apikey: apiKey,
     }
 });
 
@@ -65,6 +70,6 @@ export class NewsApi {
      *   `data.articles` array contains raw article records.
      */
     getArticlesForSourceId(sourceId) {
-        return http.get(`${topHeadlinesEndpoint}`, {params: { sources: sourceId}});
+        return http.get(`${topHeadlinesEndpoint}`, {params: { domain: sourceId}});
     }
 }
